@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <HTTPClient.h>
 
 #include <board_mapping.h>
 #include <init.h>
