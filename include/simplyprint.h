@@ -3,6 +3,7 @@
 
 #include <simplyprint.h>
 
-int arreter_impression(int printer_id);
+String GetState(int printer_id);
+int pauser_impression(int printer_id);
 
 #endif

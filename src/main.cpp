@@ -11,12 +11,21 @@
 #include <display.h>
 #include <simplyprint.h>
 
+#define IMP_402 21937
+#define IMP_Mag 18491
+
+int paused_print = 0;
 
 void setup() {
   initialisationSerie();
   initialisationWifi();
+
+  paused_print = pauser_impression(IMP_402);
+  Serial.println(paused_print);
 }
 
 void loop() {
+    
+
     
 }
