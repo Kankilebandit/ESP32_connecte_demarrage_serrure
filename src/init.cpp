@@ -14,7 +14,6 @@ int initialisationBroches(void)
 
   return 0;
 }
-
 // Fonction d'initialisation de l'UART
 int initialisationSerie(void)
 {
