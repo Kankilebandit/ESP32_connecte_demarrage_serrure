@@ -5,5 +5,5 @@
 #include <ArduinoJson.h>
 #include <HTTPClient.h>
 int arreter_impression(int printer_id);
-void test(int printer_id);
+bool isPrinterPrinting(int printer_id);
 #endif
