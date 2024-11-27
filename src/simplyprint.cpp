@@ -91,8 +91,15 @@ int pauser_impression(int printer_id)
     http.begin((API_HOST + path + printer_id));
     http.addHeader("accept", "application/json");
     http.addHeader("X-API-KEY", API_KEY);
+    // Corps de la requête
 
-    int httpResponseCode = http.POST("{}");
+    //A CHANGER EN FONCTION DU MENU
+    String requestBody = "{\"success\": true, \"rating\": 4}";
+    http.addHeader("Content-Type", "application/json");
+    
+    // Envoi de la requête POST
+    int httpResponseCode = http.POST(requestBody);
+    //int httpResponseCode = http.POST("{}");
 
     if (httpResponseCode > 0)
     {
@@ -101,7 +108,6 @@ int pauser_impression(int printer_id)
         const size_t capacity = 10 * JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(2) + 1024;
         DynamicJsonDocument doc(capacity);
         deserializeJson(doc, response);
-
         status = doc["status"];
     }
     else
@@ -110,6 +116,28 @@ int pauser_impression(int printer_id)
         printf("No response\r\n");
     }
     http.end();
+
+    if (status == true)
+    {
+        return 1; // pause successful
+    }
+    else
+    {
+        return 0; // cannot pause
+    }
+}
+
+int impression_finit(int printer_id)
+{
+    bool status = false;
+    HTTPClient http;
+
+    String path = "printers/actions/ClearBed?pid=";
+    http.begin((API_HOST + path + printer_id));
+    http.addHeader("accept", "application/json");
+    http.addHeader("X-API-KEY", API_KEY);
+    int httpResponseCode = http.POST("{}");
+
 
     if (status == true)
     {
