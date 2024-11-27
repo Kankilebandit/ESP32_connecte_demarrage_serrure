@@ -6,7 +6,7 @@ int arreter_impression(int printer_id) {
     return 0;
 }
 
-int test(int printer_id){
+void test(int printer_id){
   http.begin("https://api.simplyprint.io/12305/printers/Get");         // on fais une demande a un site(ici un api)
   http.addHeader("X-API-KEY", "cd0b5d0b-745a-4228-9cee-48c1aa8226da"); // Remplace YOUR_API_KEY par ta clé API
   http.addHeader("accept", "application/json");                        // Pour spécifier le format de la réponse
