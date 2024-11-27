@@ -24,7 +24,4 @@ void setup()
 
 void loop()
 {
-
-  Serial.println(GetState(IMP_402));
-  delay(500);
 }
