@@ -80,6 +80,7 @@ int continuer_impression(int printer_id)
 
 int pauser_impression(int printer_id)
 {
+    bool status = false;
     HTTPClient http;
 
     String path = "printers/actions/Pause?pid=";
@@ -97,19 +98,21 @@ int pauser_impression(int printer_id)
         DynamicJsonDocument doc(capacity);
         deserializeJson(doc, response);
 
-        if (doc["status"] == true)
-        {
-            return 1; // pause successful
-        }
-        else
-        {
-            /*JsonArray data = doc["data"];
+        status = doc["status"];
+    }
+    else
+    {
+        printf("%d",httpResponseCode);
+        printf("No response\r\n");
+    }
+    http.end();
 
-            for (JsonObject printerObj : data)
-            {
-                printerObj[""]
-            }*/
-            return 0; // cannot pause
-        }
+    if (status == true)
+    {
+        return 1; // pause successful
+    }
+    else
+    {
+        return 0; // cannot pause
     }
 }
