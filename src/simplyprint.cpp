@@ -46,11 +46,13 @@ String GetState(int printer_id)
 
 int continuer_impression(int printer_id)
 {
+    bool status = false;
     HTTPClient http;
-    String path = "printers/actions/Pause?pid=";
+    String path = "printers/actions/Resume?pid=";
     http.begin((API_HOST + path + printer_id));
     http.addHeader("accept", "application/json");
     http.addHeader("X-API-KEY", API_KEY);
+
     int httpResponseCode = http.POST("{}");
 
     if (httpResponseCode > 0)
@@ -61,20 +63,22 @@ int continuer_impression(int printer_id)
         DynamicJsonDocument doc(capacity);
         deserializeJson(doc, response);
 
-        if (doc["status"] == true)
-        {
-            return 1; // pause successful
-        }
-        else
-        {
-            /*JsonArray data = doc["data"];
+        status = doc["status"];
+    }
+    else
+    {
+        printf("%d", httpResponseCode);
+        printf("No response\r\n");
+    }
+    http.end();
 
-            for (JsonObject printerObj : data)
-            {
-                printerObj[""]
-            }*/
-            return 0; // cannot pause
-        }
+    if (status == true)
+    {
+        return 1; // Resume successful
+    }
+    else
+    {
+        return 0; // cannot Resume
     }
 }
 
@@ -102,7 +106,7 @@ int pauser_impression(int printer_id)
     }
     else
     {
-        printf("%d",httpResponseCode);
+        printf("%d", httpResponseCode);
         printf("No response\r\n");
     }
     http.end();

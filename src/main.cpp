@@ -16,16 +16,21 @@
 
 int paused_print = 0;
 
-void setup() {
+void setup()
+{
   initialisationSerie();
   initialisationWifi();
 
   paused_print = pauser_impression(IMP_402);
   Serial.println(paused_print);
+  Serial.println(GetState(IMP_402));
+  paused_print = continuer_impression(IMP_402);
+  Serial.println(paused_print);
 }
 
-void loop() {
-    
+void loop()
+{
 
-    
+  Serial.println(GetState(IMP_402));
+  delay(500);
 }
