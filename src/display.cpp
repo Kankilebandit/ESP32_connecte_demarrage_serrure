@@ -3,6 +3,7 @@
 #include <board_mapping.h>
 #define boutonSelect A0
 #define pot A2
+#define DEBOUNCE_DELAY 50  // Temps de debounce en millisecondes
 HardwareSerial MySerial(1); // define a Serial for UART1
 const int MySerialRX = 16;
 const int MySerialTX = 17;
@@ -11,17 +12,29 @@ void init_ecran(void)
 {
     MySerial.begin(9600, SERIAL_8N1, MySerialRX, MySerialTX);
 }
+
+
 int select(void)
 {
     pinMode(boutonSelect, INPUT_PULLUP);
-    if (digitalRead(boutonSelect))
-    {
-        return 0;
+    static unsigned long lastDebounceTime = 0;  // Le dernier moment où l'état du bouton a changé
+    static bool lastButtonState = HIGH;  // Dernier état stable du bouton
+    bool buttonState = digitalRead(boutonSelect);  // Lire l'état actuel du bouton
+
+    // Vérifier si le bouton a changé d'état
+    if (buttonState != lastButtonState) {
+        lastDebounceTime = millis();  // Réinitialiser le temps de debounce
     }
-    else
-    {
-        return 1;
+
+    // Si suffisamment de temps s'est écoulé depuis le dernier changement d'état
+    if ((millis() - lastDebounceTime) > DEBOUNCE_DELAY) {
+        if (buttonState == LOW) {  // Si le bouton est appuyé (état LOW car INPUT_PULLUP)
+            return 1;
+        }
     }
+
+    // Si le bouton n'est pas encore stabilisé, retourner 0
+    return 0;
 }
 int curseur(void)
 {
@@ -50,46 +63,197 @@ void clear_screen(void)
     MySerial.write(0x51);
 }
 
-int afficher_message_accueil(int curseurTest)
+void afficher_message_accueil(int curseurValue)
 {
-    if (curseurTest == 0 || curseurTest == 1)
+    if (curseurValue == 0 || curseurValue == 1)
     {
-        MySerial.write(" [choix 1]");
+        MySerial.write(" [Pause/continue]");
         MySerial.write(0xFE);
         MySerial.write(0x45);
         MySerial.write(0x40);
-        MySerial.write("choix 2");
+        MySerial.write("Finished");
         MySerial.write(0xFE);
         MySerial.write(0x45);
         MySerial.write(0x14);
-        MySerial.write("choix 3");
-        return 0;
+        MySerial.write("Cancel?");
     }
 
-    else if (curseurTest == 2)
+    else if (curseurValue == 2)
     {
-        MySerial.write(" choix 1");
+        MySerial.write(" Pause/continue");
         MySerial.write(0xFE);
         MySerial.write(0x45);
         MySerial.write(0x40);
-        MySerial.write("[choix 2]");
+        MySerial.write("[Finished]");
         MySerial.write(0xFE);
         MySerial.write(0x45);
         MySerial.write(0x14);
-        MySerial.write("choix 3");
-        return 0;
+        MySerial.write("Cancel?");
     }
-    else 
+    else
     {
-        MySerial.write(" choix 1");
+        MySerial.write(" Pause/continue");
         MySerial.write(0xFE);
         MySerial.write(0x45);
         MySerial.write(0x40);
-        MySerial.write("choix 2");
+        MySerial.write("Finished");
         MySerial.write(0xFE);
         MySerial.write(0x45);
         MySerial.write(0x14);
-        MySerial.write("[choix 3]");
-        return 0;
+        MySerial.write("[Cancel?]");
     }
+}
+void Afficher_message_Cancel(int curseurValue)
+{
+    if (curseurValue == 0 || curseurValue == 1)
+    {
+        MySerial.write(" [Fail]");
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(0x40);
+        MySerial.write("Regret");
+    }
+
+    else
+    {
+        MySerial.write(" Fail");
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(0x40);
+        MySerial.write("[Regret]");
+    }
+}
+void Afficher_message_clearbed()
+{
+    MySerial.write("bed empty?");
+    MySerial.write(0xFE);
+    MySerial.write(0x45);
+    MySerial.write(0x40);
+    MySerial.write("if yes press button");
+}
+void Afficher_message_End(int curseurValue)
+{
+    if (curseurValue == 0 || curseurValue == 1)
+    {
+        MySerial.write(" [Failed]");
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(0x40);
+        MySerial.write("Finished");
+    }
+
+    else
+    {
+        MySerial.write(" Failed");
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(0x40);
+        MySerial.write("[Finished]");
+    }
+}
+
+void Afficher_message_Note(int curseurValue)
+{
+    if (curseurValue == 0)
+    {
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(2);
+        MySerial.write("[1]");
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(8);
+        MySerial.write("2");
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(13);
+        MySerial.write("3");
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(18);
+        MySerial.write("4");
+    }   
+    else if (curseurValue == 1)
+    {
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(3);
+        MySerial.write("1");
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(7);
+        MySerial.write("[2]");
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(13);
+        MySerial.write("3");
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(18);
+        MySerial.write("4");
+    }  
+    else if (curseurValue == 2)
+    {
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(3);
+        MySerial.write("1");
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(8);
+        MySerial.write("2");
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(12);
+        MySerial.write("[3]");
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(18);
+        MySerial.write("4");
+    }   
+    else
+    {
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(2);
+        MySerial.write("1");
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(8);
+        MySerial.write("2");
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(13);
+        MySerial.write("3");
+        MySerial.write(0xFE);
+        MySerial.write(0x45);
+        MySerial.write(17);
+        MySerial.write("[4]");
+    } 
+
+}
+
+void Afficher_message_Pause()
+{
+    MySerial.write("printing");
+    MySerial.write(0xFE);
+    MySerial.write(0x45);
+    MySerial.write(0x40);
+    MySerial.write("Do you want to pause");
+    MySerial.write(0xFE);
+    MySerial.write(0x45);
+    MySerial.write(0x14);
+    MySerial.write("if yes press button");
+}
+void Afficher_message_Continuer()
+{
+    MySerial.write("pause");
+    MySerial.write(0xFE);
+    MySerial.write(0x45);
+    MySerial.write(0x40);
+    MySerial.write("resume printing?");
+    MySerial.write(0xFE);
+    MySerial.write(0x45);
+    MySerial.write(0x14);
+    MySerial.write("if yes press button");
 }

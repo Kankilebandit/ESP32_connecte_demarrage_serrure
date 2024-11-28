@@ -18,10 +18,12 @@ int paused_print = 0;
 int getCurseur = 0;
 enum Etat
 {
-  ETAT_menu,  // Etat 0 : Valeur entre 0 et 1022
-  ETAT_test0_1, // Etat 1 : Valeur entre 1023 et 2045
-  ETAT_test2, // Etat 2 : Valeur entre 2046 et 3068
-  ETAT_test3  // Etat 3 : Valeur >= 3069
+  ETAT_menu,     // Etat 0 : Valeur entre 0 et 1022
+  ETAT_pause,    // Etat 1 : Valeur entre 1023 et 2045
+  ETAT_clearbed, // Etat 2 : Valeur entre 2046 et 3068
+  ETAT_finit,
+  ETAT_note,
+  ETAT_Cancel // Etat 3 : Valeur >= 3069
 };
 Etat currentState = ETAT_menu;
 void setup()
@@ -34,40 +36,98 @@ void setup()
 
 void loop()
 {
+  getCurseur = curseur();
+  clear_screen();
   switch (currentState)
   {
   case ETAT_menu:
-    clear_screen();
-    getCurseur = curseur();
-    Serial.println(getCurseur);
     afficher_message_accueil(getCurseur);
     if (select())
     {
       if (getCurseur == 0 || getCurseur == 1)
       {
-        currentState = ETAT_test0_1;
+        currentState = ETAT_pause;
       }
       else if (getCurseur == 2)
       {
-        currentState = ETAT_test2;
+        currentState = ETAT_clearbed;
       }
       else
       {
-        currentState = ETAT_test3;
+        currentState = ETAT_Cancel;
       }
     }
     break;
-  case ETAT_test0_1:
-    clear_screen();
-    Serial.println("tu es a test 1");
+  case ETAT_pause:
+    /*//String test = GetState(IMP_Mag);
+    if (ispaused == "printing")
+    {
+      Afficher_message_Pause();
+    }
+    else if (ispaused == "paused")
+    {
+      Afficher_message_Continuer();
+    }*/
     break;
-  case ETAT_test2:
-    clear_screen();
-    Serial.println("tu es a test 2");
+  case ETAT_clearbed:
+    Afficher_message_clearbed();
+    if (select())
+    {
+      currentState = ETAT_finit;
+    }
     break;
-  case ETAT_test3:
-    clear_screen();
-    Serial.println("tu es a test 3");
+  case ETAT_finit:
+    Afficher_message_End(getCurseur);
+    if (select())
+    {
+      if (getCurseur == 0 || getCurseur == 1)
+      {
+        // envoyer failed
+        currentState = ETAT_menu;
+      }
+      else
+      {
+        currentState = ETAT_note;
+      }
+    }
+    break;
+  case ETAT_note:
+    Afficher_message_Note(getCurseur);
+    if (select())
+    {
+      if (getCurseur == 0)
+      {
+        // envoyer note 1
+      }
+      else if (getCurseur == 1)
+      {
+        // envoyer note 2
+      }
+      else if (getCurseur == 2)
+      {
+        // envoyer note 3
+      }
+      else
+      {
+        // envoyer note 4
+      }
+      currentState = ETAT_menu;
+    }
+    break;
+  case ETAT_Cancel:
+    Afficher_message_Cancel(getCurseur); // curseur a 1 ou 2 = fail  || 3  ou 4 = fail
+    if (select())
+    {
+      if (getCurseur == 0 || getCurseur == 1)
+      {
+        // envoyer fail
+      }
+      else
+      {
+        // envoyer cancel
+      }
+      currentState = ETAT_menu;
+    }
     break;
   }
   delay(100);
