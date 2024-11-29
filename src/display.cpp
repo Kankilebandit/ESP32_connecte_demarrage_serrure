@@ -17,29 +17,24 @@ void init_ecran(void)
 int select(void)
 {
     pinMode(boutonSelect, INPUT_PULLUP);
-    static unsigned long lastDebounceTime = 0;  // Le dernier moment où l'état du bouton a changé
-    static bool lastButtonState = HIGH;  // Dernier état stable du bouton
-    bool buttonState = digitalRead(boutonSelect);  // Lire l'état actuel du bouton
-
-    // Vérifier si le bouton a changé d'état
-    if (buttonState != lastButtonState) {
-        lastDebounceTime = millis();  // Réinitialiser le temps de debounce
+    if (digitalRead(boutonSelect))
+    {
+        return 0;
     }
-
-    // Si suffisamment de temps s'est écoulé depuis le dernier changement d'état
-    if ((millis() - lastDebounceTime) > DEBOUNCE_DELAY) {
-        if (buttonState == LOW) {  // Si le bouton est appuyé (état LOW car INPUT_PULLUP)
-            return 1;
+    else
+    {
+        int test = digitalRead(boutonSelect);
+        while (test == 0 )
+        {
+            test = digitalRead(boutonSelect);
         }
+        return 1;
+        
     }
-
-    // Si le bouton n'est pas encore stabilisé, retourner 0
-    return 0;
 }
 int curseur(void)
 {
     int potValue = analogRead(pot);
-    Serial.println(potValue);
     if (potValue < 1023)
     {
         return 0; // Valeur entre 0 et 1022 (inclus)
@@ -125,7 +120,7 @@ void Afficher_message_Cancel(int curseurValue)
 }
 void Afficher_message_clearbed()
 {
-    MySerial.write("bed empty?");
+    MySerial.write(" bed is empty?");
     MySerial.write(0xFE);
     MySerial.write(0x45);
     MySerial.write(0x40);
@@ -256,4 +251,9 @@ void Afficher_message_Continuer()
     MySerial.write(0x45);
     MySerial.write(0x14);
     MySerial.write("if yes press button");
+}
+void Afficher_message_Merci()
+{
+    MySerial.write(" Thank you!");
+    delay(1000);
 }

@@ -10,6 +10,7 @@ void Afficher_message_End(int curseurValue);
 void Afficher_message_Note(int curseurValue);
 void Afficher_message_Pause();
 void Afficher_message_Continuer();
+void Afficher_message_Merci();
 void Afficher_message_clearbed();
 void clear_screen(void);
 int select(void);

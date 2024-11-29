@@ -16,6 +16,7 @@
 
 int paused_print = 0;
 int getCurseur = 0;
+char printerstate[20] ={ '\0'};
 enum Etat
 {
   ETAT_menu,     // Etat 0 : Valeur entre 0 et 1022
@@ -23,6 +24,7 @@ enum Etat
   ETAT_clearbed, // Etat 2 : Valeur entre 2046 et 3068
   ETAT_finit,
   ETAT_note,
+  ETAT_merci,
   ETAT_Cancel // Etat 3 : Valeur >= 3069
 };
 Etat currentState = ETAT_menu;
@@ -41,7 +43,11 @@ void loop()
   switch (currentState)
   {
   case ETAT_menu:
+
     afficher_message_accueil(getCurseur);
+    GetState(IMP_Mag, printerstate);
+    //Serial.println(printerstate);
+    
     if (select())
     {
       if (getCurseur == 0 || getCurseur == 1)
@@ -59,20 +65,21 @@ void loop()
     }
     break;
   case ETAT_pause:
-    /*//String test = GetState(IMP_Mag);
-    if (ispaused == "printing")
+    
+    /*if (ispaused == "printing")
     {
       Afficher_message_Pause();
     }
     else if (ispaused == "paused")
     {
       Afficher_message_Continuer();
-    }*/
-    break;
+    }
+    break;*/
   case ETAT_clearbed:
     Afficher_message_clearbed();
     if (select())
     {
+      //envoyer reussi
       currentState = ETAT_finit;
     }
     break;
@@ -83,10 +90,11 @@ void loop()
       if (getCurseur == 0 || getCurseur == 1)
       {
         // envoyer failed
-        currentState = ETAT_menu;
+        currentState = ETAT_merci;
       }
       else
       {
+        //aller anote
         currentState = ETAT_note;
       }
     }
@@ -111,7 +119,7 @@ void loop()
       {
         // envoyer note 4
       }
-      currentState = ETAT_menu;
+      currentState = ETAT_merci;
     }
     break;
   case ETAT_Cancel:
@@ -126,9 +134,15 @@ void loop()
       {
         // envoyer cancel
       }
-      currentState = ETAT_menu;
+      currentState = ETAT_merci;
     }
     break;
+    case ETAT_merci:
+      Afficher_message_Merci();
+      currentState = ETAT_menu;
+    break;
   }
+  
+  
   delay(100);
 }
