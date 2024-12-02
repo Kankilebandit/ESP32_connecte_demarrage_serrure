@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <HTTPClient.h>
-
+#include <ArduinoJson.h>
 #include <board_mapping.h>
 #include <init.h>
 
@@ -16,7 +16,7 @@
 
 int paused_print = 0;
 int getCurseur = 0;
-char printerstate[20] ={ '\0'};
+char printerstate[20] = {'\0'};
 enum Etat
 {
   ETAT_menu,     // Etat 0 : Valeur entre 0 et 1022
@@ -40,14 +40,13 @@ void loop()
 {
   getCurseur = curseur();
   clear_screen();
+
   switch (currentState)
   {
   case ETAT_menu:
-
     afficher_message_accueil(getCurseur);
-    GetState(IMP_Mag, printerstate);
-    //Serial.println(printerstate);
-    
+    GetState(IMP_Mag, &printerstate[0]);
+    Serial.println(printerstate);
     if (select())
     {
       if (getCurseur == 0 || getCurseur == 1)
@@ -65,21 +64,35 @@ void loop()
     }
     break;
   case ETAT_pause:
-    
-    /*if (ispaused == "printing")
+
+    if (strcmp(printerstate, "printing") == 0)
     {
       Afficher_message_Pause();
+      if (select())
+      {
+        pauser_impression(IMP_Mag);
+        currentState = ETAT_merci;
+      }
     }
-    else if (ispaused == "paused")
+    else if (strcmp(printerstate, "paused") == 0)
     {
       Afficher_message_Continuer();
+      if (select())
+      {
+        continuer_impression(IMP_Mag);
+        currentState = ETAT_merci;
+      }
     }
-    break;*/
+    else
+    {
+      // ajoute erreur
+    }
+    break;
   case ETAT_clearbed:
     Afficher_message_clearbed();
     if (select())
     {
-      //envoyer reussi
+      // envoyer reussi
       currentState = ETAT_finit;
     }
     break;
@@ -94,7 +107,8 @@ void loop()
       }
       else
       {
-        //aller anote
+        // aller anote(rien a ajouter)
+        //ajouter la fonction dans etat note
         currentState = ETAT_note;
       }
     }
@@ -124,25 +138,34 @@ void loop()
     break;
   case ETAT_Cancel:
     Afficher_message_Cancel(getCurseur); // curseur a 1 ou 2 = fail  || 3  ou 4 = fail
-    if (select())
+    if (strcmp(printerstate, "printing") == 0)
     {
-      if (getCurseur == 0 || getCurseur == 1)
+      if (select())
       {
-        // envoyer fail
+        if (getCurseur == 0 || getCurseur == 1)
+        {
+          cancel_print(IMP_Mag,1);
+          currentState = ETAT_merci;
+        }
+        else
+        {
+          cancel_print(IMP_Mag,2);
+          currentState = ETAT_merci;
+        }
+
+        currentState = ETAT_merci;
       }
-      else
-      {
-        // envoyer cancel
-      }
-      currentState = ETAT_merci;
+    }
+    else
+    {
+      //erreur
     }
     break;
-    case ETAT_merci:
-      Afficher_message_Merci();
-      currentState = ETAT_menu;
+  case ETAT_merci:
+    Afficher_message_Merci();
+    currentState = ETAT_menu;
     break;
   }
-  
-  
-  delay(100);
+
+  // delay(100);
 }
