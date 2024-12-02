@@ -25,7 +25,8 @@ enum Etat
   ETAT_finit,
   ETAT_note,
   ETAT_merci,
-  ETAT_Cancel // Etat 3 : Valeur >= 3069
+  ETAT_Cancel, // Etat 3 : Valeur >= 3069
+  ETAT_erreur
 };
 Etat currentState = ETAT_menu;
 void setup()
@@ -40,13 +41,14 @@ void loop()
 {
   getCurseur = curseur();
   clear_screen();
-
+  GetPrice(IMP_Mag);
   switch (currentState)
   {
   case ETAT_menu:
     afficher_message_accueil(getCurseur);
-    GetState(IMP_Mag, &printerstate[0]);
-    Serial.println(printerstate);
+    //GetState(IMP_Mag, &printerstate[0]);
+    //Serial.println(printerstate);
+
     if (select())
     {
       if (getCurseur == 0 || getCurseur == 1)
@@ -63,6 +65,9 @@ void loop()
       }
     }
     break;
+
+//------------------------------------------------------------------------------------------------------------------------
+// etat pause/depause
   case ETAT_pause:
 
     if (strcmp(printerstate, "printing") == 0)
@@ -85,9 +90,12 @@ void loop()
     }
     else
     {
-      // ajoute erreur
+      currentState = ETAT_erreur;
     }
     break;
+
+//------------------------------------------------------------------------------------------------------------------------
+// Imprimante a fini d'imprimer fail/reussi    
   case ETAT_clearbed:
     Afficher_message_clearbed();
     if (select())
@@ -136,6 +144,9 @@ void loop()
       currentState = ETAT_merci;
     }
     break;
+
+//------------------------------------------------------------------------------------------------------------------------
+// Cancl print
   case ETAT_Cancel:
     Afficher_message_Cancel(getCurseur); // curseur a 1 ou 2 = fail  || 3  ou 4 = fail
     if (strcmp(printerstate, "printing") == 0)
@@ -158,14 +169,24 @@ void loop()
     }
     else
     {
-      //erreur
+      currentState = ETAT_erreur;
     }
     break;
+//------------------------------------------------------------------------------------------------------------------------
+// Fonction API réussi et utiliser au bon moment=merci
+//fonction api pas utiisable dans le contexte donc erreur
   case ETAT_merci:
     Afficher_message_Merci();
     currentState = ETAT_menu;
     break;
+
+  case ETAT_erreur:
+    Afficher_message_erreur();
+    currentState = ETAT_menu;
+    break;
   }
 
-  // delay(100);
+  
+
+   delay(1000);
 }

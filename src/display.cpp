@@ -257,3 +257,13 @@ void Afficher_message_Merci()
     MySerial.write(" Thank you!");
     delay(1000);
 }
+
+void Afficher_message_erreur()
+{
+    MySerial.write(" Erreur!");
+    MySerial.write(0xFE);
+    MySerial.write(0x45);
+    MySerial.write(0x40);
+    MySerial.write(" retour au menu");
+    delay(1000);
+}

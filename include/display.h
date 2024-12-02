@@ -12,7 +12,9 @@ void Afficher_message_Pause();
 void Afficher_message_Continuer();
 void Afficher_message_Merci();
 void Afficher_message_clearbed();
+void Afficher_message_erreur();
 void clear_screen(void);
 int select(void);
 int curseur(void);
+
 #endif

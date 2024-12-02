@@ -141,3 +141,51 @@ int impression_finit(int printer_id)
         return 0; // cannot pause
     }
 }
+
+int cancel_print(int printer_id, int raison)
+{
+    bool status = false;
+    HTTPClient http;
+
+    String path = "printers/actions/Cancel?pid=";
+    http.begin((API_HOST + path + printer_id));
+    http.addHeader("accept", "application/json");
+    http.addHeader("X-API-KEY", API_KEY);
+    char requestBody[100];
+    sprintf(requestBody, "{\"reason\": %d, \"comment\": \"Cancel comment\"}", raison); 
+    http.addHeader("Content-Type", "application/json");
+    int httpResponseCode = http.POST("{}");
+    if (status == true)
+    {
+        return 1; // pause successful
+    }
+    else
+    {
+        return 0; // cannot pause
+    }
+}
+
+float GetPrice(int printer_id)
+{
+    bool status = false;
+    HTTPClient http;
+    float price=0.0;
+    //String path = "jobs/GetDetails?id={job.cost}";
+    String path = "jobs/GetPaginatedPrintJobs";
+    http.begin((API_HOST + path + printer_id));
+    http.addHeader("accept", "application/json");
+    http.addHeader("X-API-KEY", API_KEY);
+    int httpResponseCode = http.POST("{}");
+    if (httpResponseCode > 0) {
+        String response = http.getString();
+        const size_t capacity = 10 * JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(2) + 1024;
+        DynamicJsonDocument doc(capacity);
+        deserializeJson(doc, response);
+        Serial.println(response);
+        if (doc["status"] == true) {
+            JsonArray data = doc["data"]; 
+        }
+        http.end();
+    }
+    return price;
+}
