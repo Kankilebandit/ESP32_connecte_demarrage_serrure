@@ -14,11 +14,15 @@
 #define IMP_402 21937
 #define IMP_Mag 18491
 
+#define GREEN 14
+#define RED 32
+#define ORANGE 15
+
 int paused_print = 0;
 int getCurseur = 0;
 int ClearBedFlag = 0;
 char printerstate[20] = {'\0'};
-const char* prevprinterstate;
+char prevprinterstate[20] = {'\0'};
 enum Etat
 {
   ETAT_menu,     // Etat 0 : Valeur entre 0 et 1022
@@ -27,6 +31,7 @@ enum Etat
   ETAT_finit,
   ETAT_note,
   ETAT_merci,
+  ETAT_PRIX,
   ETAT_Cancel, // Etat 3 : Valeur >= 3069
   ETAT_erreur
 };
@@ -37,14 +42,15 @@ void setup()
   initialisationWifi();
   init_ecran();
   clear_screen();
-
-  GetState(IMP_Mag, printerstate);
-  prevprinterstate = printerstate;
+  pinMode(GREEN, OUTPUT);
+  pinMode(RED, OUTPUT);
+  pinMode(ORANGE, OUTPUT);
+  GetState(IMP_Mag, &prevprinterstate[0]);
 }
 
 void loop()
 {
- /* GetState(IMP_Mag, printerstate);
+  /*GetState(IMP_Mag, &printerstate[0]);
   if((strcmp(printerstate, prevprinterstate))>0){
     if((strcmp(prevprinterstate, "printing")) and (strcmp(printerstate, "operational"))){
       ClearBedFlag = 1;
@@ -55,13 +61,14 @@ void loop()
 
   getCurseur = curseur();
   clear_screen();
-  GetPrice(IMP_Mag);
+
   switch (currentState)
   {
   case ETAT_menu:
     afficher_message_accueil(getCurseur);
-    //GetState(IMP_Mag, &printerstate[0]);
-    //Serial.println(printerstate);
+    GetState(IMP_Mag, &printerstate[0]);
+    Serial.println(printerstate);
+    // Serial.println(printerstate);
 
     if (select())
     {
@@ -80,8 +87,8 @@ void loop()
     }
     break;
 
-//------------------------------------------------------------------------------------------------------------------------
-// etat pause/depause
+    //------------------------------------------------------------------------------------------------------------------------
+    // etat pause/depause
   case ETAT_pause:
 
     if (strcmp(printerstate, "printing") == 0)
@@ -108,8 +115,8 @@ void loop()
     }
     break;
 
-//------------------------------------------------------------------------------------------------------------------------
-// Imprimante a fini d'imprimer fail/reussi    
+    //------------------------------------------------------------------------------------------------------------------------
+    // Imprimante a fini d'imprimer fail/reussi
   case ETAT_clearbed:
     Afficher_message_clearbed();
     if (select())
@@ -130,7 +137,7 @@ void loop()
       else
       {
         // aller anote(rien a ajouter)
-        //ajouter la fonction dans etat note
+        // ajouter la fonction dans etat note
         currentState = ETAT_note;
       }
     }
@@ -159,8 +166,8 @@ void loop()
     }
     break;
 
-//------------------------------------------------------------------------------------------------------------------------
-// Cancl print
+    //------------------------------------------------------------------------------------------------------------------------
+    // Cancl print
   case ETAT_Cancel:
     Afficher_message_Cancel(getCurseur); // curseur a 1 ou 2 = fail  || 3  ou 4 = fail
     if (strcmp(printerstate, "printing") == 0)
@@ -169,12 +176,12 @@ void loop()
       {
         if (getCurseur == 0 || getCurseur == 1)
         {
-          cancel_print(IMP_Mag,1);
+          cancel_print(IMP_Mag, 1);
           currentState = ETAT_merci;
         }
         else
         {
-          cancel_print(IMP_Mag,2);
+          cancel_print(IMP_Mag, 2);
           currentState = ETAT_merci;
         }
 
@@ -186,9 +193,9 @@ void loop()
       currentState = ETAT_erreur;
     }
     break;
-//------------------------------------------------------------------------------------------------------------------------
-// Fonction API réussi et utiliser au bon moment=merci
-//fonction api pas utiisable dans le contexte donc erreur
+    //------------------------------------------------------------------------------------------------------------------------
+    // Fonction API réussi et utiliser au bon moment=merci
+    // fonction api pas utiisable dans le contexte donc erreur
   case ETAT_merci:
     Afficher_message_Merci();
     currentState = ETAT_menu;
@@ -198,9 +205,50 @@ void loop()
     Afficher_message_erreur();
     currentState = ETAT_menu;
     break;
+
+  case ETAT_PRIX:
+    float prixMag = GetPriceMag();
+    float prix402 = GetPrice402();
+    Serial.println(prixMag);
+    // afficher_message_prix(prixMag, prixMag);
+    if (select())
+    {
+      currentState = ETAT_menu;
+    }
+
+    break;
   }
 
-  
+  if (((strcmp(printerstate, "operational")) == 0) and (!ClearBedFlag))
+  {
+    digitalWrite(GREEN, HIGH);
+    digitalWrite(RED, LOW);
+    digitalWrite(ORANGE, LOW);
+  }
+  else if (ClearBedFlag)
+  {
+    digitalWrite(GREEN, !digitalRead(GREEN));
+    digitalWrite(RED, LOW);
+    digitalWrite(ORANGE, LOW);
+  }
+  else if ((strcmp(printerstate, "printing")) == 0)
+  {
+    digitalWrite(GREEN, LOW);
+    digitalWrite(RED, HIGH);
+    digitalWrite(ORANGE, LOW);
+  }
+  else if ((strcmp(printerstate, "paused")) == 0)
+  {
+    digitalWrite(GREEN, LOW);
+    digitalWrite(RED, LOW);
+    digitalWrite(ORANGE, HIGH);
+  }
+  else
+  {
+    digitalWrite(GREEN, LOW);
+    digitalWrite(RED, LOW);
+    digitalWrite(ORANGE, LOW);
+  }
 
-   delay(1000);
+  delay(1000);
 }

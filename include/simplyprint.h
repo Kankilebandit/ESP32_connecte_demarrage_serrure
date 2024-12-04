@@ -8,5 +8,6 @@ int continuer_impression(int printer_id);
 int pauser_impression(int printer_id);
 int impression_finit(int printer_id);
 int cancel_print(int printer_id,int raison);
-float GetPrice(int printer_id);
+float GetPriceMag(void);
+float GetPrice402(void);
 #endif

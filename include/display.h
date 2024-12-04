@@ -4,6 +4,7 @@
 
 #include <display.h>
 void init_ecran(void);  
+void afficher_message_prix(float mag, float imprimante2);
 void afficher_message_accueil(int curseurValue);
 void Afficher_message_Cancel(int curseurValue);
 void Afficher_message_End(int curseurValue);

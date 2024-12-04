@@ -165,14 +165,14 @@ int cancel_print(int printer_id, int raison)
     }
 }
 
-float GetPrice(int printer_id)
+float GetPrice402(void)
 {
     bool status = false;
     HTTPClient http;
     float price=0.0;
     //String path = "jobs/GetDetails?id={job.cost}";
     String path = "jobs/GetPaginatedPrintJobs";
-    String requestBody = "{\"page\": 1, \"page_size\": 10, \"printer_ids\": [385], \"status\": [\"cancelled\", \"finished\"]}";
+    String requestBody = "{\"page\": 1, \"page_size\": 10, \"printer_ids\": [18491], \"cost\": [\"total_cost\", \"finished\"]}";
     http.begin((API_HOST + path));
     http.addHeader("accept", "application/json");
     http.addHeader("X-API-KEY", API_KEY);
@@ -182,9 +182,65 @@ float GetPrice(int printer_id)
         const size_t capacity = 10 * JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(2) + 1024;
         DynamicJsonDocument doc(capacity);
         deserializeJson(doc, response);
-        Serial.println(response);
+        //Serial.println(response);
         if (doc["status"] == true) {
             JsonArray data = doc["data"]; 
+             for (JsonObject job : data) {
+            if (job.containsKey("cost")) {
+                JsonObject cost = job["cost"];
+                
+                // Lire le "total_cost"
+                if (cost.containsKey("total_cost")) {
+                    float totalCost = cost["total_cost"];
+                    price = totalCost;
+                    Serial.print("Total cost: ");
+                    Serial.println(totalCost);
+                } else {
+                    Serial.println("No total cost found.");
+                }
+            }
+        }
+        }
+        http.end();
+    }
+    return price;
+}
+
+float GetPriceMag(void)
+{
+    bool status = false;
+    HTTPClient http;
+    float price=0.0;
+    //String path = "jobs/GetDetails?id={job.cost}";
+    String path = "jobs/GetPaginatedPrintJobs";
+    String requestBody = "{\"page\": 1, \"page_size\": 10, \"printer_ids\": [21937], \"cost\": [\"total_cost\", \"finished\"]}";
+    http.begin((API_HOST + path));
+    http.addHeader("accept", "application/json");
+    http.addHeader("X-API-KEY", API_KEY);
+    int httpResponseCode = http.POST(requestBody);
+    if (httpResponseCode > 0) {
+        String response = http.getString();
+        const size_t capacity = 10 * JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(2) + 1024;
+        DynamicJsonDocument doc(capacity);
+        deserializeJson(doc, response);
+        //Serial.println(response);
+        if (doc["status"] == true) {
+            JsonArray data = doc["data"]; 
+             for (JsonObject job : data) {
+            if (job.containsKey("cost")) {
+                JsonObject cost = job["cost"];
+                
+                // Lire le "total_cost"
+                if (cost.containsKey("total_cost")) {
+                    float totalCost = cost["total_cost"];
+                    price = totalCost;
+                    Serial.print("Total cost: ");
+                    Serial.println(totalCost);
+                } else {
+                    Serial.println("No total cost found.");
+                }
+            }
+        }
         }
         http.end();
     }

@@ -3,7 +3,7 @@
 #include <board_mapping.h>
 #define boutonSelect A0
 #define pot A2
-#define DEBOUNCE_DELAY 50  // Temps de debounce en millisecondes
+#define DEBOUNCE_DELAY 50   // Temps de debounce en millisecondes
 HardwareSerial MySerial(1); // define a Serial for UART1
 const int MySerialRX = 16;
 const int MySerialTX = 17;
@@ -12,7 +12,6 @@ void init_ecran(void)
 {
     MySerial.begin(9600, SERIAL_8N1, MySerialRX, MySerialTX);
 }
-
 
 int select(void)
 {
@@ -24,12 +23,11 @@ int select(void)
     else
     {
         int test = digitalRead(boutonSelect);
-        while (test == 0 )
+        while (test == 0)
         {
             test = digitalRead(boutonSelect);
         }
         return 1;
-        
     }
 }
 int curseur(void)
@@ -57,7 +55,27 @@ void clear_screen(void)
     MySerial.write(0xFE);
     MySerial.write(0x51);
 }
-
+void afficher_message_prix(float mag, float imprimante2)
+{
+    char message[50]; // Un tampon pour stocker le message à envoyer
+    snprintf(message, sizeof(message), "%.2f", mag);
+    char message2[50]; // Un tampon pour stocker le message à envoyer
+    snprintf(message, sizeof(message), "%.2f",imprimante2);
+    MySerial.write(" prix impression:");
+    MySerial.write(0xFE);
+    MySerial.write(0x45);
+    MySerial.write(0x40);
+    MySerial.write("mag:");
+    for (int i = 0; i < strlen(message); i++) {
+        MySerial.write(message[i]);
+    }
+    MySerial.write(0xFE);
+    MySerial.write(0x45);
+    MySerial.write(0x50);
+    for (int i = 0; i < strlen(message); i++) {
+        MySerial.write(message2[i]);
+    }
+}
 void afficher_message_accueil(int curseurValue)
 {
     if (curseurValue == 0 || curseurValue == 1)
@@ -167,7 +185,7 @@ void Afficher_message_Note(int curseurValue)
         MySerial.write(0x45);
         MySerial.write(18);
         MySerial.write("4");
-    }   
+    }
     else if (curseurValue == 1)
     {
         MySerial.write(0xFE);
@@ -186,7 +204,7 @@ void Afficher_message_Note(int curseurValue)
         MySerial.write(0x45);
         MySerial.write(18);
         MySerial.write("4");
-    }  
+    }
     else if (curseurValue == 2)
     {
         MySerial.write(0xFE);
@@ -205,7 +223,7 @@ void Afficher_message_Note(int curseurValue)
         MySerial.write(0x45);
         MySerial.write(18);
         MySerial.write("4");
-    }   
+    }
     else
     {
         MySerial.write(0xFE);
@@ -224,8 +242,7 @@ void Afficher_message_Note(int curseurValue)
         MySerial.write(0x45);
         MySerial.write(17);
         MySerial.write("[4]");
-    } 
-
+    }
 }
 
 void Afficher_message_Pause()
