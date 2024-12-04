@@ -172,10 +172,11 @@ float GetPrice(int printer_id)
     float price=0.0;
     //String path = "jobs/GetDetails?id={job.cost}";
     String path = "jobs/GetPaginatedPrintJobs";
-    http.begin((API_HOST + path + printer_id));
+    String requestBody = "{\"page\": 1, \"page_size\": 10, \"printer_ids\": [385], \"status\": [\"cancelled\", \"finished\"]}";
+    http.begin((API_HOST + path));
     http.addHeader("accept", "application/json");
     http.addHeader("X-API-KEY", API_KEY);
-    int httpResponseCode = http.POST("{}");
+    int httpResponseCode = http.POST(requestBody);
     if (httpResponseCode > 0) {
         String response = http.getString();
         const size_t capacity = 10 * JSON_ARRAY_SIZE(1) + JSON_OBJECT_SIZE(2) + 1024;

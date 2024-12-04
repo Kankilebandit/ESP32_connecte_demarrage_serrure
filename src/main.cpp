@@ -16,7 +16,9 @@
 
 int paused_print = 0;
 int getCurseur = 0;
+int ClearBedFlag = 0;
 char printerstate[20] = {'\0'};
+const char* prevprinterstate;
 enum Etat
 {
   ETAT_menu,     // Etat 0 : Valeur entre 0 et 1022
@@ -35,10 +37,22 @@ void setup()
   initialisationWifi();
   init_ecran();
   clear_screen();
+
+  GetState(IMP_Mag, printerstate);
+  prevprinterstate = printerstate;
 }
 
 void loop()
 {
+ /* GetState(IMP_Mag, printerstate);
+  if((strcmp(printerstate, prevprinterstate))>0){
+    if((strcmp(prevprinterstate, "printing")) and (strcmp(printerstate, "operational"))){
+      ClearBedFlag = 1;
+    }else{
+      prevprinterstate = printerstate;
+    }
+  }*/
+
   getCurseur = curseur();
   clear_screen();
   GetPrice(IMP_Mag);
